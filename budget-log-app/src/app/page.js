@@ -5,6 +5,7 @@ import axios from 'axios';
 
 export default function Home() {
   const [inputUsername, setInputUsername] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
   const [username, setUsername] = useState('');
   const [hours, setHours] = useState(0);
   const [rate, setRate] = useState(0);
@@ -47,10 +48,11 @@ export default function Home() {
   
   const handleLogJob = async () => {
     try {
-      await axios.post(`${API_URL}/api/jobs`, { username, hours, rate });
+      await axios.post(`${API_URL}/api/jobs`, { username, hours, rate, description: jobDescription });
       await fetchJobs();
       setHours(0);
       setRate(0);
+      setJobDescription('');
     } catch (error) {
       console.error("Error logging job:", error);
     }
@@ -125,7 +127,7 @@ export default function Home() {
                   Submit
                 </button>
               </div>
-            </div>  
+            </div>
 
             {username && (
               <div className="space-y-6 mt-6">
@@ -164,6 +166,18 @@ export default function Home() {
                           className="input input-bordered w-full"
                         />
                       </div>
+                    </div>
+                    <div className="form-control mt-4">
+                      <label className="label">
+                        <span className="label-text">Description</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        placeholder="Job Description"
+                        className="input input-bordered w-full"
+                      />
                     </div>
                     <button 
                       onClick={handleLogJob}
@@ -208,7 +222,7 @@ export default function Home() {
                     </div>
                     <button 
                       onClick={handleLogExpense}
-                      className="btn btn-warning mt-4"
+                      className="btn btn-error mt-4" // Changed to btn-error for red color
                     >
                       Log Expense
                     </button>
@@ -226,6 +240,7 @@ export default function Home() {
                             <th>Hours</th>
                             <th>Rate</th>
                             <th>Pay</th>
+                            <th>Description</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -235,6 +250,7 @@ export default function Home() {
                               <td>{job.Hours}</td>
                               <td>${job.Rate.toFixed(2)}</td>
                               <td>${job.Pay.toFixed(2)}</td>
+                              <td>{job.description}</td>
                               <td>
                                 <button 
                                   onClick={() => handleDeleteJob(job.id)}
@@ -308,4 +324,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+} 

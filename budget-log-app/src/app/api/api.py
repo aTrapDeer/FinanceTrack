@@ -15,6 +15,8 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
+    
+    # Create jobs table if it doesn't exist
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS jobs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,6 +26,14 @@ def init_db():
             Pay REAL GENERATED ALWAYS AS (Hours * Rate) STORED
         )
     ''')
+    
+    # Add description column to jobs table if it doesn't exist
+    cursor.execute("PRAGMA table_info(jobs)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'description' not in columns:
+        cursor.execute('ALTER TABLE jobs ADD COLUMN description TEXT')
+    
+    # Create expenses table if it doesn't exist
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,10 +42,12 @@ def init_db():
             description TEXT
         )
     ''')
+    
     conn.commit()
     conn.close()
 
-init_db()  # Initialize the database
+# Call init_db at the start of your application
+init_db()
 
 @app.route('/api/jobs', methods=['GET'])
 def get_jobs():
@@ -53,8 +65,8 @@ def add_job():
     job_data = request.json
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO jobs (username, Hours, Rate) VALUES (?, ?, ?)',
-                   (job_data['username'], job_data['hours'], job_data['rate']))
+    cursor.execute('INSERT INTO jobs (username, Hours, Rate, description) VALUES (?, ?, ?, ?)',
+                   (job_data['username'], job_data['hours'], job_data['rate'], job_data['description']))
     conn.commit()
     conn.close()
     return jsonify({"message": "Job added successfully"}), 201
