@@ -13,9 +13,7 @@ export default function Home() {
   const API_URL = 'http://127.0.0.1:5000';
 
   useEffect(() => {
-    if (username) {
-      fetchJobs();
-    }
+    if (username) fetchJobs();
   }, [username]);
 
   const fetchJobs = async () => {
@@ -28,16 +26,16 @@ export default function Home() {
     }
   };
 
-  const handleSubmitUsername = async () => {
-    if (username.trim()) {
-      await fetchJobs();
-    }
+  const handleSubmitUsername = () => {
+    if (username.trim()) fetchJobs();
   };
   
   const handleLogJob = async () => {
     try {
       await axios.post(`${API_URL}/api/jobs`, { username, hours, rate });
       await fetchJobs();
+      setHours(0);
+      setRate(0);
     } catch (error) {
       console.error("Error logging job:", error);
     }
@@ -54,90 +52,123 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
-          <h1 className="text-3xl font-bold mb-5 text-center text-gray-800">Work Hours Logger</h1>
-          
-          <div className="mb-5">
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            />
-            <button 
-              onClick={handleSubmitUsername}
-              className="mt-3 w-full bg-cyan-500 text-white py-2 px-4 rounded-md hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50"
-            >
-              Submit Username
-            </button>
-          </div>
-
-          {username && (
-            <>
-              <h2 className="text-2xl font-semibold mb-4 text-gray-700">Welcome, {username}!</h2>
-              <div className="space-y-4 mb-5">
+    <div className="min-h-screen bg-base-200 p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h1 className="card-title text-3xl font-bold text-center mb-6">Work Hours Logger</h1>
+            
+            {/* Username Input Section */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Username</span>
+              </label>
+              <div className="input-group">
                 <input
-                  type="number"
-                  value={hours}
-                  onChange={(e) => setHours(parseFloat(e.target.value))}
-                  placeholder="Enter work hours"
-                  step="0.5"
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-                <input
-                  type="number"
-                  value={rate}
-                  onChange={(e) => setRate(parseFloat(e.target.value))}
-                  placeholder="Enter hourly rate"
-                  step="0.5"
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="input input-bordered flex-grow"
                 />
                 <button 
-                  onClick={handleLogJob}
-                  className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                  onClick={handleSubmitUsername}
+                  className="btn btn-primary"
                 >
-                  Log Job
+                  Submit
                 </button>
               </div>
+            </div>
 
-              <h3 className="text-xl font-semibold mb-3 text-gray-700">Logged Jobs</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {jobs.map((job, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">{job.Hours}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{job.Rate}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{job.Pay}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {username && (
+              <div className="space-y-6 mt-6">
+                <h2 className="text-2xl font-bold">Welcome, {username}!</h2>
+                
+                {/* Job Logging Section */}
+                <div className="card bg-base-200 shadow-lg">
+                  <div className="card-body">
+                    <h3 className="card-title">Log New Job</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">Hours</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={hours}
+                          onChange={(e) => setHours(parseFloat(e.target.value))}
+                          placeholder="Hours"
+                          step="0.5"
+                          min="0"
+                          className="input input-bordered w-full"
+                        />
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">Rate</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={rate}
+                          onChange={(e) => setRate(parseFloat(e.target.value))}
+                          placeholder="Rate"
+                          step="0.5"
+                          min="0"
+                          className="input input-bordered w-full"
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      onClick={handleLogJob}
+                      className="btn btn-success mt-4"
+                    >
+                      Log Job
+                    </button>
+                  </div>
+                </div>
+
+                {/* Jobs Table Section */}
+                <div className="card bg-base-100 shadow-lg">
+                  <div className="card-body">
+                    <h3 className="card-title">Logged Jobs</h3>
+                    <div className="overflow-x-auto">
+                      <table className="table w-full">
+                        <thead>
+                          <tr>
+                            <th>Hours</th>
+                            <th>Rate</th>
+                            <th>Pay</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {jobs.map((job, index) => (
+                            <tr key={index}>
+                              <td>{job.Hours}</td>
+                              <td>${job.Rate.toFixed(2)}</td>
+                              <td>${job.Pay.toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Pay and Reset Section */}
+                <div className="card bg-base-200 shadow-lg">
+                  <div className="card-body flex-row justify-between items-center">
+                    <p className="text-xl font-bold">Total Pay: <span className="text-success">${totalPay.toFixed(2)}</span></p>
+                    <button 
+                      onClick={handleResetAll}
+                      className="btn btn-error"
+                    >
+                      Reset All
+                    </button>
+                  </div>
+                </div>
               </div>
-
-              <p className="mt-4 text-lg font-semibold text-gray-700">Total Pay: ${totalPay.toFixed(2)}</p>
-
-              <button 
-                onClick={handleResetAll}
-                className="mt-5 w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              >
-                Reset All
-              </button>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
