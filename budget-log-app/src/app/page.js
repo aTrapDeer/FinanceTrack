@@ -18,38 +18,68 @@ export default function Home() {
 
   const API_URL = 'http://127.0.0.1:5000';
 
-  const fetchJobs = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/jobs?username=${username}`);
-      setJobs(response.data.jobs);
-      setTotalPay(response.data.totalPay);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    }
+  const resetState = () => {
+    setJobs([]);
+    setExpenses([]);
+    setTotalPay(0);
+    setTotalExpenses(0);
+    setHours(0);
+    setRate(0);
+    setJobDescription('');
+    setExpense(0);
+    setExpenseDescription('');
   };
 
-  const fetchExpenses = async () => {
+  const fetchJobs = async (user) => {
     try {
-      const response = await axios.get(`${API_URL}/api/expenses?username=${username}`);
-      setExpenses(response.data.expenses);
-      setTotalExpenses(response.data.totalExpenses);
+      const response = await axios.get(`${API_URL}/api/jobs?username=${user}`);
+      setJobs(response.data.jobs || []);
+      setTotalPay(response.data.totalPay || 0);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      setJobs([]);
+      setTotalPay(0);
+    }
+  };
+  
+  const fetchExpenses = async (user) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/expenses?username=${user}`);
+      setExpenses(response.data.expenses || []);
+      setTotalExpenses(response.data.totalExpenses || 0);
     } catch (error) {
       console.error("Error fetching expenses:", error);
+      setExpenses([]);
+      setTotalExpenses(0);
     }
   };
 
   const handleSubmitUsername = async () => {
     if (inputUsername.trim()) {
+      resetState(); // Reset the state before setting new username
       setUsername(inputUsername);
-      await fetchJobs();
-      await fetchExpenses();
+      try {
+        const jobsResponse = await axios.get(`${API_URL}/api/jobs?username=${inputUsername}`);
+        setJobs(jobsResponse.data.jobs || []);
+        setTotalPay(jobsResponse.data.totalPay || 0);
+  
+        const expensesResponse = await axios.get(`${API_URL}/api/expenses?username=${inputUsername}`);
+        setExpenses(expensesResponse.data.expenses || []);
+        setTotalExpenses(expensesResponse.data.totalExpenses || 0);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setJobs([]);
+        setExpenses([]);
+        setTotalPay(0);
+        setTotalExpenses(0);
+      }
     }
   };
   
   const handleLogJob = async () => {
     try {
       await axios.post(`${API_URL}/api/jobs`, { username, hours, rate, description: jobDescription });
-      await fetchJobs();
+      await fetchJobs(username);
       setHours(0);
       setRate(0);
       setJobDescription('');
@@ -57,11 +87,11 @@ export default function Home() {
       console.error("Error logging job:", error);
     }
   };
-
+  
   const handleLogExpense = async () => {
     try {
       await axios.post(`${API_URL}/api/expenses`, { username, amount: expense, description: expenseDescription });
-      await fetchExpenses();
+      await fetchExpenses(username);
       setExpense(0);
       setExpenseDescription('');
     } catch (error) {
@@ -69,37 +99,32 @@ export default function Home() {
     }
   };
   
-  const handleResetAll = async () => {
-    try {
-      await axios.delete(`${API_URL}/api/jobs?username=${username}`);
-      await axios.delete(`${API_URL}/api/expenses?username=${username}`);
-      setJobs([]);
-      setExpenses([]);
-      setTotalPay(0);
-      setTotalExpenses(0);
-    } catch (error) {
-      console.error("Error resetting data:", error);
-    }
-  };
-
   const handleDeleteJob = async (jobId) => {
     try {
       await axios.delete(`${API_URL}/api/jobs/${jobId}`);
-      await fetchJobs();
+      await fetchJobs(username);
     } catch (error) {
       console.error("Error deleting job:", error);
     }
   };
-
+  
   const handleDeleteExpense = async (expenseId) => {
     try {
       await axios.delete(`${API_URL}/api/expenses/${expenseId}`);
-      await fetchExpenses();
+      await fetchExpenses(username);
     } catch (error) {
       console.error("Error deleting expense:", error);
     }
   };
-
+  const handleResetAll = async () => {
+    try {
+      await axios.delete(`${API_URL}/api/jobs?username=${username}`);
+      await axios.delete(`${API_URL}/api/expenses?username=${username}`);
+      resetState();
+    } catch (error) {
+      console.error("Error resetting data:", error);
+    }
+  };
   return (
     <div className="min-h-screen bg-base-200 p-4">
       <div className="max-w-4xl mx-auto">
