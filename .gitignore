@@ -1,0 +1,6 @@
+node_modules
+node_modules
+budget-app/budget-log-app/work_hours.db
+budget-app/budget-log-app/src/app/api/database.db
+venv/
+*.db
